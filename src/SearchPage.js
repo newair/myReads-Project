@@ -42,16 +42,13 @@ function SearchPage(props) {
 
   useEffect(()=>{
 
-    console.log(debouncedValue);
     if (!debouncedValue) {
-      console.log('Debounce empty');
       setSearchedBooks([]);
       return;
     }
     search(debouncedValue, 100).then(result => {
 
       if (result.error) throw Error('Response error');
-      console.log(result);
       setSearchedBooks(result);
     }).catch(e => {
       console.error('Error occurred', e);
