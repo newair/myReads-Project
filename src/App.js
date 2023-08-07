@@ -43,10 +43,6 @@ function App() {
    */
   const onCategoryChange = async (updatedBook, shelf) => {
 
-    if (!bookShelves.find(shelve => shelve.key === shelf)) {
-      return;
-    }
-
     try {
       const updatedResponse = await update(updatedBook, shelf);
 
@@ -56,14 +52,19 @@ function App() {
       throw e;
     }
 
-    const categoryChangedBooks = allBooks.map(book => {
+    let bookAvailable;
+    let categoryChangedBooks = allBooks.map(book => {
       if (book.id === updatedBook.id) {
+        bookAvailable = true
         return {
           ...updatedBook,
           shelf
         }
       } else return book;
     })
+
+    categoryChangedBooks =  !bookAvailable ? [...allBooks, { ...updatedBook, shelf}]: categoryChangedBooks;
+
     setAllBooks(categoryChangedBooks)
   }
   return (
@@ -73,7 +74,7 @@ function App() {
           <Menu></Menu>
           <Routes>
             <Route exact path="/" element={allBooks.length && <BookShelves bookShelves={bookShelves} allBooks={allBooks} onCategoryChange={onCategoryChange} />} />
-            <Route exact path="search" element={allBooks.length && <SearchPage allBooks={allBooks} onCategoryChange={onCategoryChange} />} />
+            <Route exact path="search" element={allBooks.length && <SearchPage onCategoryChange={onCategoryChange} />} />
           </Routes>
         </div>
       }

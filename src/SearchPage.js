@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Book from "./Book";
 import PropTypes from 'prop-types'
+import { search } from './BooksAPI'
+import { useDebounce } from "./utils/useDebounce";
 
 /**
  * Filter text based on the searchtext and allbooks
@@ -8,18 +10,18 @@ import PropTypes from 'prop-types'
  * @param {*} allBooks 
  * @returns 
  */
-function filterText(searchText, allBooks) {
-  if (searchText) {
-    const searchedValue = searchText.toLowerCase();
-    const filtered = allBooks.filter(book => (book.title.toLowerCase().includes(searchedValue)
-      || book.authors.join(' ').toLowerCase().includes(searchedValue)
-      || book.industryIdentifiers.map(inId => inId.type).join(' ').toLowerCase().includes(searchedValue)
-    ));
-    return filtered;
-  } else {
-    return allBooks;
-  }
-}
+// function filterText(searchText, allBooks) {
+//   if (searchText) {
+//     const searchedValue = searchText.toLowerCase();
+//     const filtered = allBooks.filter(book => (book.title.toLowerCase().includes(searchedValue)
+//       || book.authors.join(' ').toLowerCase().includes(searchedValue)
+//       || book.industryIdentifiers.map(inId => inId.type).join(' ').toLowerCase().includes(searchedValue)
+//     ));
+//     return filtered;
+//   } else {
+//     return allBooks;
+//   }
+// }
 /**
  * Search page component that can be used to search books by
  * name, author and title
@@ -28,15 +30,35 @@ function filterText(searchText, allBooks) {
  */
 function SearchPage(props) {
 
-  const { allBooks, onCategoryChange } = props;
-
-  const [searchedText, setSearchedText] = useState();
-  const searchedBooks = filterText(searchedText, allBooks);
+  const {  onCategoryChange } = props;
+  const [ searchedBooks, setSearchedBooks ]=  useState([]);
+  const [ searchedText, setSearchedText ]=  useState();
+  const debouncedValue = useDebounce(searchedText, 500);
 
   const onTextChange = (e) => {
     e.preventDefault();
     setSearchedText(e.target.value);
   }
+
+  useEffect(()=>{
+
+    console.log(debouncedValue);
+    if (!debouncedValue) {
+      console.log('Debounce empty');
+      setSearchedBooks([]);
+      return;
+    }
+    search(debouncedValue, 100).then(result => {
+
+      if (result.error) throw Error('Response error');
+      console.log(result);
+      setSearchedBooks(result);
+    }).catch(e => {
+      console.error('Error occurred', e);
+      setSearchedBooks([]);
+      alert('Invalid search query');
+    });
+  }, [debouncedValue] );
 
   return (<div className="search-books">
     <div className="search-books-bar">
@@ -52,7 +74,7 @@ function SearchPage(props) {
     <div className="search-books-results">
 
       <ol className="books-grid">
-        {searchedBooks.map(book => (
+        {searchedBooks && searchedBooks.map(book => (
           <li key={book.id}>
             <Book book={book} onCategoryChange={onCategoryChange}></Book>
           </li>
