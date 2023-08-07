@@ -20,5 +20,3 @@ And User can search the book using book name, author name or ISBN and assign it 
 - Navigate to project directory and run `npm i`
 - Then run `npm run start`
 - Navigate to `localhost:3000` in the browser
-
-
