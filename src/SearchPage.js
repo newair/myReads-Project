@@ -30,9 +30,9 @@ import { useDebounce } from "./utils/useDebounce";
  */
 function SearchPage(props) {
 
-  const {  onCategoryChange } = props;
-  const [ searchedBooks, setSearchedBooks ]=  useState([]);
-  const [ searchedText, setSearchedText ]=  useState();
+  const { onCategoryChange, allBooks } = props;
+  const [searchedBooks, setSearchedBooks] = useState([]);
+  const [searchedText, setSearchedText] = useState();
   const debouncedValue = useDebounce(searchedText, 500);
 
   const onTextChange = (e) => {
@@ -40,7 +40,7 @@ function SearchPage(props) {
     setSearchedText(e.target.value);
   }
 
-  useEffect(()=>{
+  useEffect(() => {
 
     if (!debouncedValue) {
       setSearchedBooks([]);
@@ -49,13 +49,21 @@ function SearchPage(props) {
     search(debouncedValue, 100).then(result => {
 
       if (result.error) throw Error('Response error');
+
+      result = result.map(book => {
+        const foundBook = allBooks.find(allBook => (allBook.id === book.id))
+        if (foundBook) return foundBook;
+        else return book;
+      }
+      );
       setSearchedBooks(result);
+
     }).catch(e => {
       console.error('Error occurred', e);
       setSearchedBooks([]);
       alert('Invalid search query');
     });
-  }, [debouncedValue] );
+  }, [debouncedValue, allBooks]);
 
   return (<div className="search-books">
     <div className="search-books-bar">

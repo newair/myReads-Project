@@ -74,7 +74,7 @@ function App() {
           <Menu></Menu>
           <Routes>
             <Route exact path="/" element={allBooks.length && <BookShelves bookShelves={bookShelves} allBooks={allBooks} onCategoryChange={onCategoryChange} />} />
-            <Route exact path="search" element={allBooks.length && <SearchPage onCategoryChange={onCategoryChange} />} />
+            <Route exact path="search" element={allBooks.length && <SearchPage onCategoryChange={onCategoryChange} allBooks={allBooks}/>} />
           </Routes>
         </div>
       }
